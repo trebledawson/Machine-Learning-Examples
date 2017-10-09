@@ -8,7 +8,7 @@
 #  List of Imports  #
 #####################
 import numpy as np
-import numpy.random as rand
+from numpy.random import multivariate_normal as mvnrnd
 import matplotlib.pyplot as plt
 import time
 
@@ -23,8 +23,8 @@ def main():
     mu2 = [3,3]
     sigma1 = [[0.1,0],[0,0.1]]
     sigma2 = [[0.1,0],[0,0.1]]
-    Q1 = rand.multivariate_normal(mu1,sigma1,1000)
-    Q2 = rand.multivariate_normal(mu2, sigma2, 1000)
+    Q1 = mvnrnd(mu1,sigma1,1000)
+    Q2 = mvnrnd(mu2, sigma2, 1000)
 
     # Perform gradient descent
     (theta,costs) = gradient_descent(Q1,Q2)
