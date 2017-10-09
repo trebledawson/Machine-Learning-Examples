@@ -4,16 +4,18 @@
 # 2017-10-06                                                               #
 ############################################################################
 
-###################
-# List of Imports #
-###################
+#####################
+#  List of Imports  #
+#####################
+
 import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-########
-# Main #
-########
+##########
+#  Main  #
+##########
+
 def main():
     random_discrete_distribution = np.random.rand(400,1)
     random_discrete_distribution = random_discrete_distribution / np.sum(random_discrete_distribution)
@@ -28,6 +30,7 @@ def main():
 # X is a vector containing normalized probabilities              #
 # Y is an integer representing the number of samples to be drawn #
 ##################################################################
+
 def cumulative_dist_gen(X,Y):
     sample = []
     for i in range (0,Y):
