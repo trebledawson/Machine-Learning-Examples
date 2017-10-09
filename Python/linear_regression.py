@@ -8,6 +8,7 @@
 #  List of Imports  #
 #####################
 import numpy as np
+from numpy.random import rand as rand
 import matplotlib.pyplot as plt
 import time
 
@@ -19,8 +20,8 @@ def main():
     b = 7
     m = 2
     n = 100
-    noise = np.random.rand(n,1)
-    X = np.random.rand(n,1)*10
+    noise = rand(n,1)
+    X = rand(n,1)*10
     Y = m*X + b + noise
 
     (theta,costs) = gradient_descent(X,Y)
