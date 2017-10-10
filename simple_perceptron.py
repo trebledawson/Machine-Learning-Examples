@@ -87,7 +87,7 @@ class SimplePerceptron:
         self.num_classes = len(self.classes)
         self.num_features = train.shape[1]
 
-        # Sort instances by classes
+        # Generate node weights
         self.weights = np.ndarray((self.num_classes, self.num_features + 1))
         for i in range(self.num_classes):
             class_data = train[np.nonzero(labels == i)[0]]
