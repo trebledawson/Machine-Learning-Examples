@@ -20,32 +20,36 @@ def main():
     cases = 1000
     mu1 = [1,1]
     mu2 = [3,3]
+    mu3 = [1,3]
     sigma1 = [[0.1,0],[0,0.1]]
     sigma2 = [[0.1,0],[0,0.1]]
-    Q1 = rand.multivariate_normal(mu1,sigma1,cases)
+    sigma3 = [[0.1,0],[0,0.1]]
+    Q1 = rand.multivariate_normal(mu1, sigma1, cases)
     Q2 = rand.multivariate_normal(mu2, sigma2, cases)
-    Q = np.vstack((Q1,Q2))
-    Y = np.vstack((np.zeros((cases,1)),np.ones((cases,1))))
+    Q3 = rand.multivariate_normal(mu3, sigma3, cases)
+    Q = np.vstack((Q1,Q2,Q3))
+    Y = np.vstack((np.zeros((cases,1)),np.ones((cases,1)),np.full((cases,1),2)))
 
     nb = NaiveBayes(Q,Y)
 
     plt.subplot(121)
     plt.subplot(121)
-    plt.plot(Q1[:, 0], Q1[:, 1], 'b.')
-    plt.plot(Q2[:, 0], Q2[:, 1], 'r.')
+    plt.plot(Q1[:,0], Q1[:,1], 'b.')
+    plt.plot(Q2[:,0], Q2[:,1], 'r.')
+    plt.plot(Q3[:,0], Q3[:,1], 'g.')
     plt.title('Plot of randomly generated data')
 
     # Classification test
-    rand.shuffle(Q)
-    P = nb.predict(Q)
+    mu_test = [2,2]
+    sigma_test = [[1,0],[0,1]]
+    Q_test = rand.multivariate_normal(mu_test, sigma_test, cases)
+    P = nb.predict(Q_test)
+
+    # Plotting data
     plt.subplot(122)
-    for i in range(len(P)):
-        if (P[i] == 0):
-            plt.plot(Q[i,0], Q[i,1], 'b.')
-        elif (P[i] == 1):
-            plt.plot(Q[i,0], Q[i,1], 'r.')
-        else:
-            plt.plot(Q[i,0], Q[i,1], 'k.')
+    plt.plot(Q_test[P == 0,0], Q_test[P == 0,1], 'b.')
+    plt.plot(Q_test[P == 1,0], Q_test[P == 1,1], 'r.')
+    plt.plot(Q_test[P == 2,0], Q_test[P == 2,1], 'g.')
     plt.title('Naive Bayes classification of data')
 
     plt.show()
@@ -71,7 +75,7 @@ class NaiveBayes:
         self.prior = np.zeros(self.num_classes)
 
         for i in range(self.num_classes):
-            self.train_class = train[np.nonzero(labels==i)[0],:]
+            self.train_class = train[np.nonzero(labels==i)[0]]
             self.mu[i,:] = np.mean(self.train_class, axis=0)
             self.sigma[i,:] = np.std(self.train_class, axis=0)
             self.prior[i] = len(self.train_class) / num_instances
