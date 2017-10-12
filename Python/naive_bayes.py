@@ -11,48 +11,16 @@ import numpy as np
 import scipy.stats as spstats
 import numpy.random as rand
 import matplotlib.pyplot as plt
+import time
+from sklearn import datasets
+from sklearn.model_selection import train_test_split as tts
 
 ##########
 #  Main  #
 ##########
 
 def main():
-    cases = 1000
-    mu1 = [1,1]
-    mu2 = [3,3]
-    mu3 = [1,3]
-    sigma1 = [[0.1,0],[0,0.1]]
-    sigma2 = [[0.1,0],[0,0.1]]
-    sigma3 = [[0.1,0],[0,0.1]]
-    Q1 = rand.multivariate_normal(mu1, sigma1, cases)
-    Q2 = rand.multivariate_normal(mu2, sigma2, cases)
-    Q3 = rand.multivariate_normal(mu3, sigma3, cases)
-    Q = np.vstack((Q1,Q2,Q3))
-    Y = np.vstack((np.zeros((cases,1)),np.ones((cases,1)),np.full((cases,1),2)))
-
-    nb = NaiveBayes(Q,Y)
-
-    plt.subplot(121)
-    plt.subplot(121)
-    plt.plot(Q1[:,0], Q1[:,1], 'b.')
-    plt.plot(Q2[:,0], Q2[:,1], 'r.')
-    plt.plot(Q3[:,0], Q3[:,1], 'g.')
-    plt.title('Plot of randomly generated data')
-
-    # Classification test
-    mu_test = [2,2]
-    sigma_test = [[1,0],[0,1]]
-    Q_test = rand.multivariate_normal(mu_test, sigma_test, cases)
-    P = nb.predict(Q_test)
-
-    # Plotting data
-    plt.subplot(122)
-    plt.plot(Q_test[P == 0,0], Q_test[P == 0,1], 'b.')
-    plt.plot(Q_test[P == 1,0], Q_test[P == 1,1], 'r.')
-    plt.plot(Q_test[P == 2,0], Q_test[P == 2,1], 'g.')
-    plt.title('Naive Bayes classification of data')
-
-    plt.show()
+    test_nd()
 
 ############################
 #  Naive Bayes Classifier  #
@@ -109,6 +77,73 @@ class NaiveBayes:
 
         return classifications
 
+##################
+#  Test scripts  #
+##################
+
+def test_2d():
+    cases = 1000
+    mu1 = [1,1]
+    mu2 = [3,3]
+    mu3 = [1,3]
+    sigma1 = [[0.1,0],[0,0.1]]
+    sigma2 = [[0.1,0],[0,0.1]]
+    sigma3 = [[0.1,0],[0,0.1]]
+    Q1 = rand.multivariate_normal(mu1, sigma1, cases)
+    Q2 = rand.multivariate_normal(mu2, sigma2, cases)
+    Q3 = rand.multivariate_normal(mu3, sigma3, cases)
+    Q = np.vstack((Q1,Q2,Q3))
+    Y = np.vstack((np.zeros((cases,1)),np.ones((cases,1)),np.full((cases,1),2)))
+
+    nb = NaiveBayes(Q,Y)
+
+    plt.subplot(121)
+    plt.subplot(121)
+    plt.plot(Q1[:,0], Q1[:,1], 'b.')
+    plt.plot(Q2[:,0], Q2[:,1], 'r.')
+    plt.plot(Q3[:,0], Q3[:,1], 'g.')
+    plt.title('Plot of randomly generated data')
+
+    # Classification test
+    mu_test = [2,2]
+    sigma_test = [[1,0],[0,1]]
+    Q_test = rand.multivariate_normal(mu_test, sigma_test, cases)
+    P = nb.predict(Q_test)
+
+    # Plotting data
+    plt.subplot(122)
+    plt.plot(Q_test[P == 0,0], Q_test[P == 0,1], 'b.')
+    plt.plot(Q_test[P == 1,0], Q_test[P == 1,1], 'r.')
+    plt.plot(Q_test[P == 2,0], Q_test[P == 2,1], 'g.')
+    plt.title('Naive Bayes classification of data')
+
+    plt.show()
+
+def test_nd():
+    start = time.time()
+    print('Program start.')
+
+    # Load Fisher iris data
+    print('Loading Fisher iris data...')
+    iris = datasets.load_iris()
+    data_train, data_test, target_train, target_test = tts(
+                         iris.data, iris.target, test_size=0.3, random_state=0)
+
+    # Train perceptron classifier
+    print('Training Naive Bayes classifier...')
+    nb = NaiveBayes(data_train, target_train)
+
+    # Classification of test data
+    predictions = nb.predict(data_test)
+
+    # Evaluation of results
+    evaluation = np.logical_and(target_test, predictions)
+    correct = np.count_nonzero(evaluation)
+    percentage = 100 * correct / len(data_test)
+
+    # Print results
+    print('The classifier accuracy is ', percentage, '%.')
+    print('The elapsed time is', time.time() - start, 'seconds.')
 
 if __name__ == '__main__':
     main()
