@@ -13,6 +13,7 @@ from numpy.random import uniform as uniform
 from numpy.random import multivariate_normal as mvnrnd
 from math import sqrt
 from sklearn.model_selection import train_test_split as tts
+from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import time
 
@@ -44,6 +45,13 @@ class MultilayerPerceptron:
         self.data_test, self.data_val, self.labels_test, self.labels_val = tts(
             data_other, labels_other, test_size=0.5)
 
+        # Scale training data
+        scaler = MinMaxScaler()
+        scaler.fit(self.data_train)
+        self.data_train = scaler.transform(self.data_train)
+        self.data_test = scaler.transform(self.data_test)
+        self.data_val = scaler.transform(self.data_val)
+
         # Extract data dimensions
         self.num_inst = self.data_train.shape[0]
         self.num_feat = self.data_train.shape[1] - 1
@@ -62,7 +70,7 @@ class MultilayerPerceptron:
         self.max_fail = 15                      # Max validation failures
         self.max_epochs = 1000                  # Max epochs to train
         self.num_layers = 1                     # Number of hidden layers
-        self.num_nodes = [self.num_feat, 30, self.num_classes]
+        self.num_nodes = [self.num_feat, 45, self.num_classes]
         ''' ^^^ Note: Also includes input and output nodes ^^^ '''
 
         # Initialize weights
@@ -315,12 +323,12 @@ def test():
     mu1 = [0.8, 0.8]
     mu2 = [2.1, 2.1]
     mu3 = [3, 0.4]
-    sigma1 = [[0.2, 0], [0, 0.2]]
-    sigma2 = [[0.2, 0], [0, 0.2]]
-    sigma3 = [[0.2, 0], [0, 0.2]]
-    class1_inst = 150
-    class2_inst = 150
-    class3_inst = 150
+    sigma1 = [[0.15, 0], [0, 0.15]]
+    sigma2 = [[0.15, 0], [0, 0.15]]
+    sigma3 = [[0.15, 0], [0, 0.15]]
+    class1_inst = 200
+    class2_inst = 200
+    class3_inst = 200
     Q1 = np.array(mvnrnd(mu1, sigma1, class1_inst))
     Q2 = np.array(mvnrnd(mu2, sigma2, class2_inst))
     Q3 = np.array(mvnrnd(mu3, sigma3, class3_inst))
@@ -335,7 +343,7 @@ def test():
 
     plt.figure()
     mu_t = [1.6, 1.6]
-    sigma_t = [[0.35, 0], [0, 0.35]]
+    sigma_t = [[0.45, 0], [0, 0.45]]
     test_inst = 10000
     test = np.array(mvnrnd(mu_t, sigma_t, test_inst))
 
@@ -354,7 +362,7 @@ def test():
     plt.plot(test[P == 1, 0], test[P == 1, 1], 'r.')
     plt.plot(test[P == 2, 0], test[P == 2, 1], 'g.')
     plt.title('Classified test data')
-    plt.xlim(xmin=-0.5, xmax=3.5)
+    plt.xlim(xmin=-0.5, xmax=4.5)
     plt.ylim(ymin=-0.5, ymax=3.5)
 
     plt.show()
