@@ -8,19 +8,31 @@
 #  List of Imports  #
 #####################
 import numpy as np
+import pandas as pd
+import string
 import scipy.stats as spstats
 import numpy.random as rand
 import matplotlib.pyplot as plt
-import time
-from sklearn import datasets
-from sklearn.model_selection import train_test_split as tts
+from sklearn import datasets as ds
+from sklearn.model_selection import KFold
 
 ##########
 #  Main  #
 ##########
 
 def main():
-    test_nd()
+    UCI_data = 1
+
+    if UCI_data == 1:
+        iris()
+    elif UCI_data == 2:
+        wine()
+    elif UCI_data == 3:
+        cancer()
+    elif UCI_data == 4:
+        letters()
+    elif UCI_data == 5:
+        drive()
 
 ############################
 #  Naive Bayes Classifier  #
@@ -48,8 +60,6 @@ class NaiveBayes:
             self.sigma[i,:] = np.std(self.train_class, axis=0)
             self.prior[i] = len(self.train_class) / num_instances
 
-        print('The Naive Bayes classifier has been successfully trained.\n')
-
     def predict(self, test):
         test = np.array(test)
         num_instances = test.shape[0]
@@ -67,19 +77,30 @@ class NaiveBayes:
                                                            self.sigma[j,:])
             # ...and posterior probabilities...
             for j in range(self.num_classes):
-                Q = self.prior[j]
-                R = np.prod(cc_likelihood[j, :])
                 posterior[j] = self.prior[j] * np.prod(cc_likelihood[j,:],
                                                        axis=0)
 
             # ...and make classification decision.
             classifications.append(np.argmax(posterior))
 
-        return classifications
+        return np.array(classifications)
 
 ##################
 #  Test scripts  #
 ##################
+
+def run_naive_bayes(dtrain, dtest, ltrain, ltest):
+    # Train Naive Bayes classifier
+    nb = NaiveBayes(dtrain, ltrain)
+
+    # Classification of test data
+    pred = nb.predict(dtest)
+
+    # Evaluation of results
+    evaluation = np.logical_and(ltest.T, pred)
+    correct = np.count_nonzero(evaluation)
+
+    return correct, len(dtest)
 
 def test_2d():
     cases = 1000
@@ -119,31 +140,190 @@ def test_2d():
 
     plt.show()
 
-def test_nd():
-    start = time.time()
+def iris():
     print('Program start.')
 
     # Load Fisher iris data
     print('Loading Fisher iris data...')
-    iris = datasets.load_iris()
-    data_train, data_test, target_train, target_test = tts(
-                         iris.data, iris.target, test_size=0.3, random_state=0)
+    iris = ds.load_iris()
 
-    # Train perceptron classifier
-    print('Training Naive Bayes classifier...')
-    nb = NaiveBayes(data_train, target_train)
+    kf = KFold(n_splits=10, shuffle=True)
+    results = []
+    totals = []
+    count = 1
+    for train_idx, test_idx in kf.split(iris.data):
+        dtrain = iris.data[train_idx]
+        dtest = iris.data[test_idx]
+        ltrain = iris.target[train_idx]
+        ltest = iris.target[test_idx]
 
-    # Classification of test data
-    predictions = nb.predict(data_test)
+        result, total = run_naive_bayes(dtrain, dtest, ltrain, ltest)
+        percentage = 100 * result / total
 
-    # Evaluation of results
-    evaluation = np.logical_and(target_test, predictions)
-    correct = np.count_nonzero(evaluation)
-    percentage = 100 * correct / len(data_test)
+        # Print results
+        print('Fold', count, 'accuracy is', percentage, 'percent.')
 
-    # Print results
-    print('The classifier accuracy is ', percentage, '%.')
-    print('The elapsed time is', time.time() - start, 'seconds.')
+        results.append(result)
+        totals.append(total)
+        count += 1
+
+    result = sum(results)
+    total = sum(totals)
+
+    print('Overall K-fold accuracy is', 100 * result / total, 'percent.')
+
+def wine():
+    print('Program start.')
+
+    # Load wine data
+    print('Loading UCI wine dataset...')
+    wine = ds.load_wine()
+
+    kf = KFold(n_splits=10, shuffle=True)
+    results = []
+    totals = []
+    count = 1
+    for train_idx, test_idx in kf.split(wine.data):
+        dtrain = wine.data[train_idx]
+        dtest = wine.data[test_idx]
+        ltrain = wine.target[train_idx]
+        ltest = wine.target[test_idx]
+
+        result, total = run_naive_bayes(dtrain, dtest, ltrain, ltest)
+        percentage = 100 * result / total
+
+        # Print results
+        print('Fold', count, 'accuracy is', percentage, 'percent.')
+
+        results.append(result)
+        totals.append(total)
+        count += 1
+
+    result = sum(results)
+    total = sum(totals)
+
+    print('Overall K-fold accuracy is', 100 * result / total, 'percent.')
+
+def cancer():
+    print('Program start.')
+
+    # Load breast cancer Wisconsin (diagnostic) data
+    print('Loading UCI breast cancer Wisconsin dataset...')
+    data, target = ds.load_breast_cancer(return_X_y=True)
+
+    kf = KFold(n_splits=10, shuffle=True)
+    results = []
+    totals = []
+    count = 1
+
+    for train_idx, test_idx in kf.split(data):
+        dtrain = data[train_idx]
+        dtest = data[test_idx]
+        ltrain = target[train_idx]
+        ltest = target[test_idx]
+
+        result, total = run_naive_bayes(dtrain, dtest, ltrain, ltest)
+        percentage = 100 * result / total
+
+        # Print results
+        print('Fold', count, 'accuracy is', percentage, 'percent.')
+
+        results.append(result)
+        totals.append(total)
+        count += 1
+
+    result = sum(results)
+    total = sum(totals)
+
+    print('Overall K-fold accuracy is', 100 * result / total, 'percent.')
+
+def letters():
+    print('Program start.')
+
+    # Load letter recognition data
+    print('Loading UCI letter recognition dataset...')
+    file = "G:\Glenn\Misc\Machine Learning\Datasets\\UCI Datasets\Letter " \
+           "Recognition Data\letter-recognition.data"
+
+    names = ['letter', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+    data = pd.read_csv(file, names=names)
+    labels = np.zeros((data.shape[0], 1))
+
+    for letter, index in zip(list(string.ascii_uppercase), list(range(26))):
+        labels[data.index[data['letter'] == letter]] = index
+
+    data = np.array(data.drop('letter', 1))
+
+    kf = KFold(n_splits=10, shuffle=True)
+    results = []
+    totals = []
+    count = 1
+
+    for train_idx, test_idx in kf.split(data):
+        dtrain = data[train_idx]
+        dtest = data[test_idx]
+        ltrain = labels[train_idx]
+        ltest = labels[test_idx]
+
+        print('Fold evaluation...')
+        result, total = run_naive_bayes(dtrain, dtest, ltrain, ltest)
+        percentage = 100 * result / total
+
+        # Print results
+        print('Fold', count, 'accuracy is', percentage, 'percent.')
+
+        results.append(result)
+        totals.append(total)
+        count += 1
+
+    result = sum(results)
+    total = sum(totals)
+
+    print('Overall K-fold accuracy is', 100 * result / total, 'percent.')
+
+def drive():
+
+    # Load sensorless drive data
+    print('Loading UCI sensorless drive diagnosis dataset...')
+    file = "G:\Glenn\Misc\Machine Learning\Datasets\\UCI " \
+           "Datasets\Sensorless Drive Diagnosis\Sensorless_drive_diagnosis.txt"
+
+    names = list(range(49))
+
+    data = pd.read_csv(file, delim_whitespace=True, names=names)
+    labels = np.array(data[48]).reshape(-1, 1)
+    labels -= 1
+
+    data = np.array(data.drop(48, 1))
+
+    kf = KFold(n_splits=10, shuffle=True)
+    results = []
+    totals = []
+    count = 1
+
+    for train_idx, test_idx in kf.split(data):
+        dtrain = data[train_idx]
+        dtest = data[test_idx]
+        ltrain = labels[train_idx]
+        ltest = labels[test_idx]
+
+        print('Fold evaluation...')
+        result, total = run_naive_bayes(dtrain, dtest, ltrain, ltest)
+        percentage = 100 * result / total
+
+        # Print results
+        print('Fold', count, 'accuracy is', percentage, 'percent.')
+
+        results.append(result)
+        totals.append(total)
+        count += 1
+
+    result = sum(results)
+    total = sum(totals)
+
+    print('Overall K-fold accuracy is', 100 * result / total, 'percent.')
+
 
 if __name__ == '__main__':
     main()
