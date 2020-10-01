@@ -77,7 +77,6 @@ def gradient_descent(data, targets, theta=rand(2), alpha=0.001, epsilon=1e-9):
     scaler = 2 * len(data)
     delta_cost = 1
     costs = []
-    first = True
     while delta_cost > epsilon:
         # Calculating residual
         residual = np.ravel((data @ theta) - targets.T)
@@ -89,9 +88,8 @@ def gradient_descent(data, targets, theta=rand(2), alpha=0.001, epsilon=1e-9):
         cost = np.sum(np.power(residual, 2)) / scaler
 
         # Checking delta_cost
-        if first:
+        if len(costs) == 0:
             delta_cost = abs(cost)
-            first = False
         else:
             delta_cost = abs(costs[-1] - cost)
         
