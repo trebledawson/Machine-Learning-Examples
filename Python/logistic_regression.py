@@ -83,7 +83,6 @@ def gradient_descent(data_a, data_b, alpha=1e-3, epsilon=1e-2, theta=rand(3)):
     # Gradient descent algorithm using logistic function
     dCost = 1
     costs = []
-    first = True
     while dCost > epsilon:
         # Calculate error
         logits = 1 / (1 + np.exp(-(data @ theta)))
@@ -96,9 +95,8 @@ def gradient_descent(data_a, data_b, alpha=1e-3, epsilon=1e-2, theta=rand(3)):
         cost = np.sum(-targets * np.log(logits)
                       - (1 - targets) * np.log(1 - logits))
 
-        if first:
+        if len(costs) == 0:
             dCost = abs(cost)
-            first = False
         else:
             dCost = abs(costs[-1] - cost)
             
